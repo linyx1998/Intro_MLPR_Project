@@ -1,0 +1,5 @@
+rbf 0.0001 => train acc: 0.3098 test acc: 0.3155
+rbf 0.001 => train acc: 0.30978 test acc: 0.3155
+rbf 0.01 => train acc: 0.35494 test acc: 0.3613
+rbf 0.1 => train acc: 0.47936 test acc: 0.4582
+rbf 1 => train acc: 0.70284 test acc: 0.5436
