@@ -7,17 +7,41 @@ import sys
 
 TRAIN_RATIO = 0.49
 BATCH_SIZE = 128
-LEARNING_RATE = 0.01
-EPOCH_NUM = 30
+LEARNING_RATE = 0.001
+EPOCH_NUM = 50
 
 if __name__ == '__main__':
-    transform = transforms.Compose([
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.5,), (0.5,), (0.5,))
+    # ])
+
+    transform_train_shape = transforms.Compose([
+        transforms.RandomHorizontalFlip(0.1),
+        transforms.RandomVerticalFlip(0.1),
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomRotation(0.5),
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,), (0.5,))
     ])
 
-    train_dataset = datasets.CIFAR10('./cifar10_data', train=True, download=True, transform=transform)
-    test_dataset = datasets.CIFAR10('./cifar10_data', train=False, download=True, transform=transform)
+    transform_train_color = transforms.Compose([
+        transforms.ColorJitter(),
+        transforms.RandomGrayscale(),
+        transforms.RandomInvert(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,), (0.5,))
+    ])
+
+    transform_test = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,), (0.5,))
+    ])
+
+    train_dataset = datasets.CIFAR10('./cifar10_data', train=True, download=True, 
+                    transform=transform_train_shape)
+    test_dataset = datasets.CIFAR10('./cifar10_data', train=False, download=True, 
+                    transform=transform_test)
 
     train_sampler = torch.utils.data.sampler.SubsetRandomSampler(
                     range(0, (int)(len(train_dataset)*TRAIN_RATIO)))
