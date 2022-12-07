@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # y_train = y_train[:1000]
     # X_test = X_test[:1000]
     # y_test = y_test[:1000]
-    feature_remain_ratio = np.linspace(0.1,0.9,8) # from 50% to 90%
+    feature_remain_ratio = np.linspace(0.1,0.9,9) # from 50% to 90%
     feature_remain = (feature_remain_ratio * X_train[0].size).astype(int);
 
     if(sys.argv[1]=='PCA'):
