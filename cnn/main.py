@@ -9,7 +9,7 @@ import sys
 TRAIN_RATIO = 0.49
 BATCH_SIZE = 256
 LEARNING_RATE = 0.01
-EPOCH_NUM = 100
+EPOCH_NUM = 200
 
 if __name__ == '__main__':
     # transform = transforms.Compose([
