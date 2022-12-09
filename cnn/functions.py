@@ -50,7 +50,59 @@ def train(model, train_data_loader, valid_data_loader, epoch_num, lr, model_name
         print("epoch "+str(epoch), "eval acc = "+str(eval_acc), "eval loss = "+str(eval_loss))
         print()
 
-    torch.save(model, './trained_models/'+model_name+'_'+str(epoch_num)+'.pth')
+    # torch.save(model, './trained_models/'+model_name+'_'+str(epoch_num)+'.pth')
+
+def optim_train(model, train_data_loader, valid_data_loader, epoch_num, lr, model_name):
+    criterion = nn.CrossEntropyLoss()
+    # optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=5e-3)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
+                   milestones=[int(epoch_num * 0.56), int(epoch_num * 0.78)],
+                   gamma=0.1, last_epoch=-1)
+    model.to(device)
+
+    for epoch in range(epoch_num):
+        # train process
+        model.train()
+        train_acc = 0
+        train_loss = 0
+        for step, (x, y_true) in enumerate(train_data_loader):
+            x = x.to(device)
+            y_true = y_true.to(device)
+            optimizer.zero_grad()
+
+            y_pred = model(x)
+            # print(y_pred.shape)
+            train_acc += (y_pred.max(1)[1] == y_true).float().mean().item()
+            loss = criterion(y_pred, y_true)
+            train_loss += loss.item()
+
+            loss.backward()
+            optimizer.step()
+        train_acc = train_acc/len(train_data_loader)
+        train_loss = train_loss/len(train_data_loader)
+
+        # eval process
+        model.eval()
+        eval_acc = 0.0
+        eval_loss = 0.0
+        for step, (x, y_true) in enumerate(valid_data_loader):
+            x = x.to(device)
+            y_true = y_true.to(device)
+            y_pred = model(x)
+
+            eval_acc += (y_pred.max(1)[1] == y_true).float().mean().item()
+            loss = criterion(y_pred, y_true)
+            eval_loss += loss.item()
+        eval_acc = eval_acc/len(valid_data_loader)
+        eval_loss = eval_loss/len(valid_data_loader)
+
+        scheduler.step()
+        print('\t last_lr:', scheduler.get_last_lr())
+
+        print("epoch "+str(epoch), "train acc = "+str(train_acc), "train loss = "+str(train_loss))
+        print("epoch "+str(epoch), "eval acc = "+str(eval_acc), "eval loss = "+str(eval_loss))
+        print()
 
 
 def test(model, test_data_loader):

@@ -1,4 +1,5 @@
 from functions import *
+from dim_reduction import *
 import torch.utils.data
 from torch import nn
 from torchvision import transforms, models, datasets
@@ -6,9 +7,9 @@ import time
 import sys
 
 TRAIN_RATIO = 0.49
-BATCH_SIZE = 128
-LEARNING_RATE = 0.001
-EPOCH_NUM = 50
+BATCH_SIZE = 256
+LEARNING_RATE = 0.01
+EPOCH_NUM = 100
 
 if __name__ == '__main__':
     # transform = transforms.Compose([
@@ -33,15 +34,26 @@ if __name__ == '__main__':
         transforms.Normalize((0.5,), (0.5,), (0.5,))
     ])
 
+    norm_mean = [0.485, 0.456, 0.406]
+    norm_std = [0.229, 0.224, 0.225]
+
+    transform_optim = transforms.Compose([
+        transforms.ToTensor(),   
+        transforms.Normalize(norm_mean, norm_std),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomErasing(scale=(0.04, 0.2), ratio=(0.5, 2)),
+        transforms.RandomCrop(32, padding=4)
+    ])
+
     transform_test = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,), (0.5,))
     ])
 
     train_dataset = datasets.CIFAR10('./cifar10_data', train=True, download=True, 
-                    transform=transform_train_shape)
+                    transform=transform_optim)
     test_dataset = datasets.CIFAR10('./cifar10_data', train=False, download=True, 
-                    transform=transform_test)
+                    transform=transform_optim)
 
     train_sampler = torch.utils.data.sampler.SubsetRandomSampler(
                     range(0, (int)(len(train_dataset)*TRAIN_RATIO)))
@@ -97,8 +109,8 @@ if __name__ == '__main__':
     print("epoches:", EPOCH_NUM)
 
     train_begin = time.time()
-    if sys.argv[2] == 'auto':
-        auto_train(classifier, train_data_loader, valid_data_loader, EPOCH_NUM, LEARNING_RATE, model_name)
+    if sys.argv[2] == 'optim':
+        optim_train(classifier, train_data_loader, valid_data_loader, EPOCH_NUM, LEARNING_RATE, model_name)
     else:
         train(classifier, train_data_loader, valid_data_loader, EPOCH_NUM, LEARNING_RATE, model_name)
     train_end = time.time()
